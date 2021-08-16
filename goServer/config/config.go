@@ -1,4 +1,4 @@
 package config
 
-var TCP_PORT = ":8080"
-var UDP_PORT = ":8081"
+var TCP_PORT = ":9000"
+var UDP_PORT = ":9001"

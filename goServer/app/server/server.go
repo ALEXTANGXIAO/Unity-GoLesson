@@ -7,6 +7,9 @@ import (
 	"github.com/wonderivan/logger"
 )
 
+var ClientMap = make(map[uint32]*Client)
+var ClientList = []*Client{}
+
 type Server struct {
 	Port string
 }
@@ -24,13 +27,13 @@ func StartServer(port string) error {
 		logger.Error(err)
 		return err
 	}
-	listener, err := net.ListenTCP("tcp4", tcpAddr)
+	listener, err := net.ListenTCP("tcp", tcpAddr)
 
 	var connid uint32 = 1000
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			logger.Error(err)
+			logger.Error("accept failed, err:", err)
 			continue
 		}
 		connid++
@@ -47,6 +50,7 @@ func handleClient(conn net.Conn, connid uint32) {
 		logger.Error(err)
 		return
 	}
+
 	buff := make([]byte, 1024)
 	for {
 		cnt, err := conn.Read(buff)
@@ -57,6 +61,49 @@ func handleClient(conn net.Conn, connid uint32) {
 		//todo
 		logger.Debug(client, cnt, buff)
 	}
+}
+
+func AddClient(client *Client) error {
+	_, handleClient := ClientMap[client.Uniid]
+	if !handleClient {
+		ClientMap[client.Uniid] = client
+	} else {
+		// return errors.New("repeat Uniid", client)
+	}
+
+	ClientList = append(ClientList, client)
+
+	return nil
+}
+
+func RemoveClient(client *Client) error {
+	_, handleClient := ClientMap[client.Uniid]
+	if !handleClient {
+		delete(ClientMap, client.Uniid)
+	} else {
+		// return errors.New("repeat Uniid", client)
+	}
+
+	ClientList = Remove(ClientList, client)
+
+	return nil
+}
+
+func Remove(values []*Client, val *Client) []*Client {
+	if len(values) <= 0 {
+		return values
+	}
+
+	res := []*Client{}
+
+	for i := 0; i < len(values); i++ {
+		if values[i] == val {
+			continue
+		}
+		v := values[i]
+		res = append(res, v)
+	}
+	return res
 }
 
 func CheckError(err error) error {

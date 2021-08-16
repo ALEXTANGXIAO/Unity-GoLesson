@@ -8,5 +8,5 @@ import (
 
 func main() {
 	fmt.Println("Hi I m server")
-	server.StartServer(config.UDP_PORT)
+	server.StartServer(config.TCP_PORT)
 }
